@@ -1,0 +1,15 @@
+# A read-only role for a teammate or grader
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata: {name: snip-viewer, namespace: snip}
+rules:
+  - apiGroups: ["", "apps", "autoscaling"]
+    resources: [pods, pods/log, services, deployments, horizontalpodautoscalers]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata: {name: snip-viewer, namespace: snip}
+subjects:
+  - {kind: Group, name: snip-viewers, apiGroup: rbac.authorization.k8s.io}
+roleRef: {kind: Role, name: snip-viewer, apiGroup: rbac.authorization.k8s.io}

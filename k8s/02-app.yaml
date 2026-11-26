@@ -1,0 +1,43 @@
+# Replace <ACCOUNT_ID> with your AWS account ID (scripts/up.sh does this for you)
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: snip, namespace: snip}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: snip}}
+  template:
+    metadata: {labels: {app: snip}}
+    spec:
+      topologySpreadConstraints:      # spread replicas over nodes
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector: {matchLabels: {app: snip}}
+      containers:
+        - name: snip
+          image: <ACCOUNT_ID>.dkr.ecr.us-west-2.amazonaws.com/snip:v2
+          ports: [{name: http, containerPort: 8000}]
+          env:
+            - name: DATABASE_URL
+              valueFrom: {secretKeyRef: {name: db-secret, key: DATABASE_URL}}
+          readinessProbe:
+            httpGet: {path: /ready, port: http}
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: {path: /healthz, port: http}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests: {cpu: 200m, memory: 128Mi}
+            limits: {cpu: 500m, memory: 256Mi}
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+---
+apiVersion: v1
+kind: Service
+metadata: {name: snip, namespace: snip, labels: {app: snip}}
+spec:
+  type: ClusterIP
+  selector: {app: snip}
+  ports: [{name: http, port: 80, targetPort: http}]

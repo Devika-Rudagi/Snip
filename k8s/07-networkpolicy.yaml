@@ -1,0 +1,11 @@
+# Only Snip pods may reach PostgreSQL
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: postgres-only-from-snip, namespace: snip}
+spec:
+  podSelector: {matchLabels: {app: postgres}}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector: {matchLabels: {app: snip}}
+      ports: [{protocol: TCP, port: 5432}]

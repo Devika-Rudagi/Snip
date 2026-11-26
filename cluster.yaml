@@ -1,0 +1,26 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: snip
+  region: us-west-2
+iam:
+  withOIDC: true                # needed by the load balancer controller
+vpc:
+  nat:
+    gateway: Disable            # no NAT gateway: avoids an always-on charge
+addons:
+  - name: vpc-cni
+    configurationValues: '{"enableNetworkPolicy": "true"}'   # enforces NetworkPolicy
+  - name: coredns
+  - name: kube-proxy
+managedNodeGroups:
+  - name: workers
+    instanceType: c7i-flex.large   # t3.medium was blocked on the Free plan
+    desiredCapacity: 2          # 2 nodes leave room for the monitoring pods
+    minSize: 2
+    maxSize: 3
+    volumeSize: 20              # default is 80 GiB; 20 is enough and cheaper
+    privateNetworking: false    # nodes in public subnets (no NAT needed)
+    iam:
+      withAddonPolicies:
+        cloudWatch: true        # lets the CloudWatch agent ship logs

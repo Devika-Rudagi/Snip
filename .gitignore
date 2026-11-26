@@ -1,0 +1,8 @@
+*.pem
+.env
+__pycache__/
+*.pyc
+.venv/
+qr.png
+iam_policy.json
+.DS_Store

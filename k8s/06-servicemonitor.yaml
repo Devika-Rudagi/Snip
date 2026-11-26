@@ -1,0 +1,10 @@
+# Tells Prometheus to scrape the app's /metrics
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: snip
+  namespace: snip
+  labels: {release: monitoring}   # must match the Helm release name
+spec:
+  selector: {matchLabels: {app: snip}}
+  endpoints: [{port: http, path: /metrics, interval: 15s}]

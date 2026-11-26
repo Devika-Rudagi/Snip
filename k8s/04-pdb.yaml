@@ -1,0 +1,7 @@
+# Fault tolerance: node maintenance can never take all replicas at once
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: {name: snip, namespace: snip}
+spec:
+  minAvailable: 1
+  selector: {matchLabels: {app: snip}}
